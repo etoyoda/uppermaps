@@ -43,12 +43,14 @@ function plot_wind(levdb, mapctx) {
 }
 
 function wplistener(ev, xhr, mapctx) {
-  var stx = 'Wind Profiler ' + xhr.response.reftime.replace(/:00:00Z/, 'Z') + ' loaded.';
+  // if there be no MSIE, we could simply take xhr.response
+  var response = JSON.parse(xhr.responseText);
+  var stx = 'Wind Profiler ' + response.reftime.replace(/:00:00Z/, 'Z') + ' loaded.';
   status_line(stx);
   mapctx.sel = {ly: null, sz: -1, tl: ''};
-  for (levid in xhr.response) {
+  for (levid in response) {
     if (levid.match(/^isobar/)) {
-      var ly = plot_wind(xhr.response[levid], mapctx);
+      var ly = plot_wind(response[levid], mapctx);
     }
   }
   if (mapctx.sel.ly) {
@@ -96,10 +98,12 @@ function init() {
   var canv = document.getElementById('mapid');
   canv.style.csstext = 'height: ' + (window.innerHeight - 22) + ';';
   var mapctx = prepare_basemap('mapid');
-  //
   var xhr = new XMLHttpRequest();
   xhr.addEventListener("load", function(ev){ wplistener(ev, xhr, mapctx); });
-  xhr.responseType = 'json';
+  // if there be no MSIE, we could simply use responseType = 'json'
+  if (navigator.userAgent.indexOf('Trident') == -1) {
+    xhr.responseType = 'text';
+  }
   var url = 'http://toyoda-eizi.net/2018/uppermaps/wpjp.json';
   xhr.open("GET", url);
   xhr.send(null);
