@@ -38,7 +38,7 @@ class WPDecode
     for iter in @sdb.keys.grep(/^R=/)
       rt = Time.gm(*@sdb[iter].values_at(*%w(rty rtm rtd rth rtn)))
       rt = rt.strftime('%Y-%m-%dT%H:%M:%SZ')
-      subset[rt] = @sdb[iter]['levels']
+      subset[rt] = @sdb[iter].select {|k,v| /^R=/ === k }
     end
     stnid = @sdb.values_at('001001', '001002').join
     @db[stnid] = subset
@@ -62,7 +62,7 @@ class WPDecode
 
   def pulse_data iter, desc, val
     return if val == 'MSNG'
-    @sdb[iter] = { 'levels' => {} } unless @sdb[iter]
+    @sdb[iter] = {} unless @sdb[iter]
     case desc
     when '004001' then @sdb[iter]['rty'] = val.to_i
     when '004002' then @sdb[iter]['rtm'] = val.to_i
@@ -83,7 +83,7 @@ class WPDecode
     when '011004' then @sdb[iter][iter2]['v'] = val.to_f
     when '011006' then @sdb[iter][iter2]['w'] = val.to_f
     when '021030' then @sdb[iter][iter2]['signal'] = val.to_f
-    when '007006' then @sdb[iter]['levels'][val.to_i] = @sdb[iter][iter2]
+    when '007006' then @sdb[iter][iter2]['gph'] = val.to_i
     end
   end
 
