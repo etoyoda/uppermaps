@@ -171,9 +171,11 @@ class WPDecode
   def stdlevels
     r = { 'reftime' => find_reftime }
     STD_LEVELS.each {|p,ztarget|
+      buf = find_gph(ztarget)
+      next if buf.empty?
       pname = "isobar.#{p}"
       r[pname] = { 'p' => p, 'z_target' => ztarget }
-      r[pname]['data'] = find_gph(ztarget)
+      r[pname]['data'] = buf
     }
     $stdout.write(JSON.pretty_generate(r))
     self
