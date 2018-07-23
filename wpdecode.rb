@@ -119,8 +119,24 @@ class WPDecode
     self
   end
 
+  def find_reftime
+    rtmax = nil
+    @db.each {|stnid,stndata|
+      stndata.each {|rt,pulse|
+        next unless /^\d/ === rt
+	if rtmax then
+	  rtmax = rt if rt > rtmax
+	else
+	  rtmax = rt
+	end
+      }
+    }
+    rtmax
+  end
+
   def find_gph ztarget
     r = {}
+    z_allow = 200 + ztarget * 0.02
     @db.each {|stnid,stndata|
       hmsl = stndata['hmsl']
       found = nil
@@ -130,7 +146,7 @@ class WPDecode
 	  next unless levdata['u'] and levdata['v']
 	  levhmsl = levdata['hagl'] + hmsl
 	  zdiff = (levhmsl - ztarget).abs
-	  next if zdiff > 400
+	  next if zdiff > z_allow
 	  if not found or zdiff < found['zdiff']
 	    found = levdata.dup
 	    found['hmsl'] = levhmsl
@@ -152,7 +168,7 @@ class WPDecode
   end
 
   def stdlevels
-    r = {}
+    r = { 'reftime' => find_reftime }
     STD_LEVELS.each {|p,ztarget|
       pname = "isobar.#{p}"
       r[pname] = { 'p' => p, 'z_target' => ztarget }
