@@ -7,7 +7,8 @@ require 'json'
 
 class WPDecode
 
-  StdLevels = {
+  STD_LEVELS = {
+    # original
     925 => 800,
     # WMO Manual on Codes, Volume II, Reg. 2/32.1
     850 => 1500,
@@ -33,12 +34,14 @@ class WPDecode
 
   def subset_flush
     return unless @sdb
+    subset = @sdb.select {|k,v| /^(lat|lon|hmsl)$/ === k }
     for iter in @sdb.keys.grep(/^R=/)
       rt = Time.gm(*@sdb[iter].values_at(*%w(rty rtm rtd rth rtn)))
-      @sdb[iter]['rt'] = rt
+      rt = rt.strftime('%Y-%m-%dT%H:%M:%SZ')
+      subset[rt] = @sdb[iter]['levels']
     end
     stnid = @sdb.values_at('001001', '001002').join
-    @db[stnid] = @sdb
+    @db[stnid] = subset
     @sdb = nil
   end
 
@@ -59,7 +62,7 @@ class WPDecode
 
   def pulse_data iter, desc, val
     return if val == 'MSNG'
-    @sdb[iter] = { 'rt' => nil } unless @sdb[iter]
+    @sdb[iter] = { 'levels' => {} } unless @sdb[iter]
     case desc
     when '004001' then @sdb[iter]['rty'] = val.to_i
     when '004002' then @sdb[iter]['rtm'] = val.to_i
@@ -80,7 +83,7 @@ class WPDecode
     when '011004' then @sdb[iter][iter2]['v'] = val.to_f
     when '011006' then @sdb[iter][iter2]['w'] = val.to_f
     when '021030' then @sdb[iter][iter2]['signal'] = val.to_f
-    when '007006' then @sdb[iter][iter2]['gph'] = val.to_i
+    when '007006' then @sdb[iter]['levels'][val.to_i] = @sdb[iter][iter2]
     end
   end
 
@@ -113,8 +116,17 @@ class WPDecode
 
   def dump
     $stdout.write(JSON.pretty_generate(@db))
+    self
+  end
+
+  def stdlevels
+    r = {}
+    STD_LEVELS.each {|p,ztarget|
+      r[p] = {}
+    }
+    $stdout.write(JSON.pretty_generate(r))
   end
 
 end
 
-WPDecode.new.scanfiles(ARGV).dump
+WPDecode.new.scanfiles(ARGV).dump.stdlevels
