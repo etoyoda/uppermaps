@@ -36,6 +36,7 @@ class WPDecode
     return unless @sdb
     subset = @sdb.select {|k,v| /^(lat|lon|hmsl)$/ === k }
     for iter in @sdb.keys.grep(/^R=/)
+      next unless @sdb[iter]['rty']
       rt = Time.gm(*@sdb[iter].values_at(*%w(rty rtm rtd rth rtn)))
       rt = rt.strftime('%Y-%m-%dT%H:%M:%SZ')
       subset[rt] = @sdb[iter].select {|k,v| /^R=/ === k }
@@ -105,7 +106,7 @@ class WPDecode
   end
 
   def scanfile filename
-    File.open(filename) {|fp| scanfp(fp) }
+    File.open(filename, 'rb') {|fp| scanfp(fp) }
     self
   end
 
