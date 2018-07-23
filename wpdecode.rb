@@ -83,7 +83,7 @@ class WPDecode
     when '011004' then @sdb[iter][iter2]['v'] = val.to_f
     when '011006' then @sdb[iter][iter2]['w'] = val.to_f
     when '021030' then @sdb[iter][iter2]['signal'] = val.to_f
-    when '007006' then @sdb[iter][iter2]['gph'] = val.to_i
+    when '007006' then @sdb[iter][iter2]['hagl'] = val.to_i
     end
   end
 
@@ -115,16 +115,51 @@ class WPDecode
   end
 
   def dump
-    $stdout.write(JSON.pretty_generate(@db))
+    $stdout.write(JSON.pretty_generate(@db)) if $DEBUG or $VERBOSE
     self
+  end
+
+  def find_gph ztarget
+    r = {}
+    @db.each {|stnid,stndata|
+      hmsl = stndata['hmsl']
+      found = nil
+      stndata.each {|rt,pulse|
+        next unless /^\d/ === rt
+        pulse.each {|levid,levdata|
+	  next unless levdata['u'] and levdata['v']
+	  levhmsl = levdata['hagl'] + hmsl
+	  zdiff = (levhmsl - ztarget).abs
+	  next if zdiff > 400
+	  if not found or zdiff < found['zdiff']
+	    found = levdata.dup
+	    found['hmsl'] = levhmsl
+	    found['zdiff'] = zdiff
+	    found['rt'] = rt
+	    found['lat'] = stndata['lat']
+	    found['lon'] = stndata['lon']
+	    ff = sprintf('%0.1f', Math::hypot(found['u'], found['v']))
+	    found['ff'] = ff.to_f
+	    dd = (Math::atan2(-found['u'], -found['v']) / Math::PI * 180 + 0.5).floor
+	    dd += 360 if dd <= 0
+	    found['dd'] = dd
+	  end
+	}
+      }
+      r[stnid] = found if found
+    }
+    r
   end
 
   def stdlevels
     r = {}
     STD_LEVELS.each {|p,ztarget|
-      r[p + 'hPa'] = { 'p' => p, 'z/target' => ztarget }
+      pname = "isobar.#{p}"
+      r[pname] = { 'p' => p, 'z_target' => ztarget }
+      r[pname]['data'] = find_gph(ztarget)
     }
     $stdout.write(JSON.pretty_generate(r))
+    self
   end
 
 end
