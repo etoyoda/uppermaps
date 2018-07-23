@@ -122,7 +122,7 @@ class WPDecode
   def stdlevels
     r = {}
     STD_LEVELS.each {|p,ztarget|
-      r[p] = {}
+      r[p + 'hPa'] = { 'p' => p, 'z/target' => ztarget }
     }
     $stdout.write(JSON.pretty_generate(r))
   end
