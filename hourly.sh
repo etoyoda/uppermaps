@@ -4,7 +4,7 @@ cd `/usr/bin/dirname $0`
 
 set -e
 
-cutoff=40
+cutoff=29
 timecard=`/usr/bin/ruby -e "puts((Time.now - $cutoff * 60).strftime('%Y %m %d %H 00'))"`
 
 if test -d tmp
