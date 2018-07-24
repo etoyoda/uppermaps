@@ -70,16 +70,26 @@ function prepare_basemap(mapid) {
     attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>(淡色)',
     maxZoom: 7
   });
+  var tile0 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/english/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>(English)',
+    maxZoom: 7
+  });
+  var tile2 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/blank/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>(白地図)',
+    maxZoom: 7
+  });
   var tile3 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg', {
     attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>(写真)',
     maxZoom: 7
   });
   var basemaps = {
+    "English": tile0,
     "淡色地図": tile1,
+    "白地図": tile2,
     "写真": tile3
   };
   status_line('base layers ready');
-  return {bm: basemaps, ly: [tile1], mi: mapid, ov: {}};
+  return {bm: basemaps, ly: [tile0], mi: mapid, ov: {}};
 }
 
 function init() {
