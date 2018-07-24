@@ -14,7 +14,35 @@ function wplistener(ev, xhr) {
   status_line(xhr.response.reftime);
 }
 
+function draw_basemap(mapid) {
+  var tile1 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>(淡色)',
+    maxZoom: 7
+  });
+  var tile3 = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg', {
+    attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">地理院タイル</a>(写真)',
+    maxZoom: 7
+  });
+  var mymap = L.map(mapid, {
+    center: [36.0, 135.0],
+    zoom: 4,
+    layers: [tile1]
+  });
+  var basemaps = {
+    "淡色地図": tile1,
+    "写真": tile3
+  };
+  var layercontrol = L.control.layers(basemaps, {}, {})
+  layercontrol.addTo(mymap);
+  status_line('basemap ready');
+  return {lc: layercontrol, map: mymap};
+}
+
+mapctx = null;
+
 function init() {
+  if (!mapctx) { mapctx = draw_basemap('mapid'); }
+  //
   var xhr = new XMLHttpRequest();
   xhr.addEventListener("load", function(ev){ wplistener(ev, xhr); });
   xhr.responseType = 'json';
@@ -22,13 +50,25 @@ function init() {
   xhr.open("GET", url);
   xhr.send(null);
   status_line('XHR sent');
+  //
 }
 
 document.addEventListener("DOMContentLoaded", init);
 
   </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
+    integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
+    integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
+    crossorigin=""></script>
+  <style>
+  #mapid { height: 300px; padding: 1px; }
+  </style>
 </head>
 <body>
-  <p id="status">...</p>
+  <div id="mapid" />
+  <hr>
+  <p id="status">(status)</p>
 </body>
 </html>
