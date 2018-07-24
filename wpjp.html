@@ -38,7 +38,6 @@ function plot_wind(levdb, mapctx) {
 }
 
 function wplistener(ev, xhr, mapctx) {
-  //status_line("loaded " + ev.loaded);
   var stx = 'WPJP data ' + xhr.response.reftime + ' loaded.';
   status_line(stx);
   mapctx.sel = {ly: null, sz: -1, tl: ''};
@@ -79,6 +78,8 @@ function prepare_basemap(mapid) {
 }
 
 function init() {
+  var canv = document.getElementById('mapid');
+  canv.style.csstext = 'height: ' + window.innerHeight + ';';
   var mapctx = prepare_basemap('mapid');
   //
   var xhr = new XMLHttpRequest();
@@ -100,11 +101,11 @@ document.addEventListener("DOMContentLoaded", init);
     integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
     crossorigin=""></script>
   <style>
-  #mapid { height: 400px; padding: 1px; }
+  #mapid { height: 600px; padding: 1px; }
   </style>
 </head>
 <body>
-  <p id="status">(status)</p>
   <div id="mapid" />
+  <p id="status">(status)</p>
 </body>
 </html>

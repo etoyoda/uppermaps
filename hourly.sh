@@ -19,14 +19,14 @@ exec 2> tmp/log.txt
 (cd tmp ; sh -$- local-collect.sh $timecard 'A_IUPC[45][0-9]RJTD')
 for bufr in tmp/A*.bufr
 do
-bufr_decoder -dump -output tmp/z.txt -inbufr $bufr
-if test -f DEBUG.decoder
-then
-  echo === DEBUG.decoder $bufr === >&2
-  cat DEBUG.decoder >&2
-  rm -f DEBUG.decoder
-fi
-cat tmp/z.txt >> tmp/wpjp.txt 
+  (cd tmp ; bufr_decoder -dump -output z.txt -inbufr ../$bufr)
+  if test -f tmp/DEBUG.decoder
+  then
+    echo === DEBUG.decoder $bufr === >&2
+    cat tmp/DEBUG.decoder >&2
+    rm -f tmp/DEBUG.decoder
+  fi
+  cat tmp/z.txt >> tmp/wpjp.txt 
 done
 ruby wpdecode.rb tmp/wpjp.txt > wpjp.json
 
