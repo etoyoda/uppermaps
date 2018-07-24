@@ -19,7 +19,9 @@ function plot_wind(levdb, mapctx) {
     var tup = levdb.data[stnid];
     var dd = Math.floor((tup.dd + 5) / 10);
     if (dd == 0) { dd = 36; }
-    var ff = Math.floor((tup.ff + 2.5) / 5) * 5;
+    // assuming ff is given in m/s
+    var ff = Math.floor((tup.ff + 1.25) / 2.5) * 5;
+    if ((ff == 0) && (tup.ff > 0.5)) { ff = 5; }
     if (ff == 0) { dd = 0; }
     var bn = 'd' + dd + 'f' + ff + '.png';
     var url = 'http://toyoda-eizi.net/2018/wxsymbols/img/' + bn;
@@ -38,7 +40,7 @@ function plot_wind(levdb, mapctx) {
 }
 
 function wplistener(ev, xhr, mapctx) {
-  var stx = 'WPJP data ' + xhr.response.reftime + ' loaded.';
+  var stx = 'Wind Profiler ' + xhr.response.reftime.replace(/:00:00Z/, 'Z') + ' loaded.';
   status_line(stx);
   mapctx.sel = {ly: null, sz: -1, tl: ''};
   for (levid in xhr.response) {
@@ -79,7 +81,7 @@ function prepare_basemap(mapid) {
 
 function init() {
   var canv = document.getElementById('mapid');
-  canv.style.csstext = 'height: ' + window.innerHeight + ';';
+  canv.style.csstext = 'height: ' + (window.innerHeight - 22) + ';';
   var mapctx = prepare_basemap('mapid');
   //
   var xhr = new XMLHttpRequest();
@@ -101,11 +103,12 @@ document.addEventListener("DOMContentLoaded", init);
     integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
     crossorigin=""></script>
   <style>
-  #mapid { height: 600px; padding: 1px; }
+  #mapid { height: 600px; margin: 0; padding: 0; }
+  #status { height: 18px; margin: 1px; padding: 0; }
   </style>
 </head>
 <body>
-  <div id="mapid" />
   <p id="status">(status)</p>
+  <div id="mapid" />
 </body>
 </html>
