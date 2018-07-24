@@ -9,9 +9,32 @@ function status_line(str) {
   stp.innerText = str;
 }
 
+function plot_wind(levdb) {
+  var windlayer = L.layerGroup([]);
+  var p = levdb.p;
+  var title = "wind " + p + " hPa";
+  for (stnid in levdb.data) {
+    var tup = levdb.data[stnid];
+    var dd = Math.floor((tup.dd + 5) / 5);
+    var ff = Math.floor((tup.ff + 2.5) / 5) * 5;
+    var bn = 'd' + dd + 'f' + ff + '.png';
+    var url = 'http://toyoda-eizi.net/2018/wxsymbols/img/' + bn;
+    var ic = L.icon({iconUrl: url, iconSize: [64, 64], iconAnchor: [32, 32]});
+    var opt = {icon: ic, title: bn};
+    L.marker([tup.lat, tup.lon], opt).addTo(windlayer);
+  }
+  windlayer.addTo(mapctx.map);
+  mapctx.lc.addOverlay(windlayer, title);
+}
+
 function wplistener(ev, xhr) {
   //status_line("loaded " + ev.loaded);
-  status_line(xhr.response.reftime);
+  status_line('WPJP data ' + xhr.response.reftime + ' loaded.');
+  for (levid in xhr.response) {
+    if (levid.match(/^isobar/)) {
+      plot_wind(xhr.response[levid]);
+    }
+  }
 }
 
 function draw_basemap(mapid) {
@@ -50,7 +73,6 @@ function init() {
   xhr.open("GET", url);
   xhr.send(null);
   status_line('XHR sent');
-  //
 }
 
 document.addEventListener("DOMContentLoaded", init);
@@ -67,8 +89,7 @@ document.addEventListener("DOMContentLoaded", init);
   </style>
 </head>
 <body>
-  <div id="mapid" />
-  <hr>
   <p id="status">(status)</p>
+  <div id="mapid" />
 </body>
 </html>
