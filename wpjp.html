@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WPJP example - uppermaps by etoyoda</title>
+  <script type="text/javascript">
+
+function status_line(str) {
+  var stp = document.getElementById('status');
+  stp.innerText = str;
+}
+
+function wplistener(ev, xhr) {
+  //status_line("loaded " + ev.loaded);
+  status_line(xhr.response.reftime);
+}
+
+function init() {
+  var xhr = new XMLHttpRequest();
+  xhr.addEventListener("load", function(ev){ wplistener(ev, xhr); });
+  xhr.responseType = 'json';
+  var url = 'http://toyoda-eizi.net/2018/uppermaps/wpjp.json';
+  xhr.open("GET", url);
+  xhr.send(null);
+  status_line('XHR sent');
+}
+
+document.addEventListener("DOMContentLoaded", init);
+
+  </script>
+</head>
+<body>
+  <p id="status">...</p>
+</body>
+</html>
