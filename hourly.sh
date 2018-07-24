@@ -10,7 +10,6 @@ timecard=`/usr/bin/ruby -e "puts((Time.now - $cutoff * 60).strftime('%Y %m %d %H
 if test -d tmp
 then
   test ! -d tmp.prev || rm -rf tmp.prev
-  echo found work directory by previous run for $(cat tmp/timecard.txt).
   mv tmp tmp.prev
 fi
 mkdir tmp
