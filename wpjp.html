@@ -13,7 +13,8 @@ function status_line(str) {
 function plot_wind(levdb, mapctx) {
   var windlayer = L.layerGroup([]);
   var p = levdb.p;
-  var title = "wind " + p + " hPa";
+  var zt = levdb.z_target;
+  var title = "wind " + p + "hPa level (" + zt + "m)";
   var n = 0
   for (stnid in levdb.data) {
     var tup = levdb.data[stnid];
